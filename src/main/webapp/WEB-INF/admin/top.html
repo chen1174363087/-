@@ -1,0 +1,86 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html lang="en" ng-app="app" ng-controller="AppCtrl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+    <META HTTP-EQUIV="Pragma" CONTENT="no-cache">
+    <META HTTP-EQUIV="Cache-Control" CONTENT="no-cache">
+    <META HTTP-EQUIV="Expires" CONTENT="0">
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+    <meta http-equiv="Content-Language" content="zh-CN"/>
+    <title>top</title>
+    <script src="/webjars/angular/1.5.8/angular.min.js"></script>
+    <script src="/webjars/angular-resource/1.5.8/angular-resource.min.js"></script>
+    <style type="text/css">
+        html, body {
+            width: 100%;
+            height: 100%;
+            margin: 0;
+            overflow: auto;
+        }
+
+        #Header {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            background-color: #00b3ee;
+            border-radius: 20px;
+            overflow: auto;
+        }
+
+        @media screen and (max-width: 1600px) {
+            html {
+                font-size: 24px;
+            }
+        }
+
+        @media screen and (max-width: 1200px) {
+            html {
+                font-size: 20px;
+            }
+        }
+
+        @media screen and (max-width: 800px) {
+            html {
+                font-size: 16px;
+            }
+        }
+
+        @media screen and (max-width: 600px) {
+            html {
+                font-size: 14px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div id="Header" ng-cloak>
+    <div style="margin-left: 10px; float: left" >
+        <span style="color: #EEF4F9;" ng-bind="'大学生宿舍管理系统'"></span>
+    </div>
+    <div style="margin-right: 10px; float: right;height: 50%" >
+        <span style="color: #EEF4F9; font-size: 10px;margin-top: 0" ng-bind="'欢迎您 '+adminName"></span>
+        <a style="color: #EEF4F9; font-size: 10px" href="/admin/logout" target="_parent" ng-bind="'退出'"></a>
+    </div>
+</div>
+</div>
+</body>
+<script type="text/javascript">
+    var app = angular.module('app', ['ngResource']);
+    app.factory('AdminApi', ['$resource', function ($resource) {
+        return $resource('/admin/login/:id', null, {});
+    }]);
+    app.controller("AppCtrl", function ($http, $scope) {
+        $http({
+            method:'GET',
+            url:'/admin/getInfo'
+        }).then(
+            function success (resp) {
+                $scope.adminName = resp.data;
+            }
+        );
+    });
+</script>
+</html>

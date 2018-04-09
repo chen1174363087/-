@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="en" ng-app="app" ng-controller="AppCtrl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+    <META HTTP-EQUIV="Pragma" CONTENT="no-cache">
+    <META HTTP-EQUIV="Cache-Control" CONTENT="no-cache">
+    <META HTTP-EQUIV="Expires" CONTENT="0">
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+    <meta http-equiv="Content-Language" content="zh-CN"/>
+    <title>concludeVisit</title>
+    <script src="/webjars/angular/1.5.8/angular.min.js"></script>
+    <script src="/webjars/angular-resource/1.5.8/angular-resource.min.js"></script>
+    <style type="text/css">
+        html, body {
+            width: 100%;
+            height: 100%;
+            margin: 0;
+            overflow-x: scroll;
+            overflow-y: scroll;
+        }
+
+        table, td, th {
+            border: 1px solid black;
+            text-align: center;
+        }
+
+        #contentRight {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            float: left;
+            background: #F5F5F5;
+            overflow-x: scroll;
+            overflow-y: scroll;
+        }
+
+        @media screen and (max-width: 1600px) {
+            html {
+                font-size: 24px;
+            }
+
+            .moreBlue {
+                color: #009ceb;
+                font-size: 18px;
+            }
+
+            .green {
+                font-size: 18px;
+                color: #00B83F;
+            }
+        }
+
+        @media screen and (max-width: 1200px) {
+            html {
+                font-size: 20px;
+            }
+
+            .moreBlue {
+                color: #009ceb;
+                font-size: 14px;
+            }
+
+            .green {
+                font-size: 14px;
+                color: #00B83F;
+            }
+        }
+
+        @media screen and (max-width: 800px) {
+            html {
+                font-size: 16px;
+            }
+
+            .moreBlue {
+                color: #009ceb;
+                font-size: 10px;
+            }
+
+            .green {
+                font-size: 10px;
+                color: #00B83F;
+            }
+        }
+
+        @media screen and (max-width: 600px) {
+            html {
+                font-size: 14px;
+            }
+
+            .moreBlue {
+                color: #009ceb;
+                font-size: 8px;
+            }
+
+            .green {
+                font-size: 8px;
+                color: #00B83F;
+            }
+        }
+    </style>
+
+</head>
+<body>
+
+<div id="contentRight" align="center" ng-cloak>
+    <div style="margin-top: 20px">
+        <div style="width: 100%">
+            <input type="text" ng-model="userManageParam.visitorName" placeholder="请输入姓名...">
+            &nbsp;
+            <input type="text" ng-model="userManageParam.visitorSex" placeholder="请输入性别...">
+            &nbsp;
+            <input type="text" ng-model="userManageParam.visitorTelphone" placeholder="请输入手机号...">
+            &nbsp;
+            <input type="text" ng-model="userManageParam.visitorIdCardNo" placeholder="请输入身份证号...">
+            &nbsp;
+            <button ng-bind="'搜索'" class="green" ng-click="userManageList(1)"></button>
+            &nbsp;
+            <button class="moreBlue" ng-bind="'返回'" ng-click="goBack()"></button>
+            <hr>
+        </div>
+
+        <div>
+            <table style="text-align: center" width="98%">
+                <thead class="moreBlue"/>
+                <tr>
+                    <td style="width: 5%">序号</td>
+                    <td style="width: 10%">姓名</td>
+                    <td style="width: 5%">性别</td>
+                    <td style="width: 10%">手机号</td>
+                    <td style="width: 15%">身份证号</td>
+                    <td style="width: 20%">有何贵干</td>
+                    <td style="width: 12.5%">登入时间</td>
+                    <td style="width: 12.5%">结束时间</td>
+                    <td style="width: 10%">操作</td>
+                </tr>
+                <tbody ng-if="arrayFlag" ng-repeat="item in userManageResult track by $index">
+                <tr ng-class="{moreBlue: $index % 2 != 0 , green: $index % 2 == 0}">
+                    <td ng-bind="$index + 1"/>
+                    <td ng-bind="item.visitorName"/>
+                    <td ng-bind="item.visitorSex"/>
+                    <td ng-bind="item.visitorTelphone"/>
+                    <td ng-bind="item.visitorIdCardNo"/>
+                    <td ng-bind="item.visitorReason"/>
+                    <td ng-bind="item.visitorIn | date:'yyyy-MM-dd HH:mm:ss'"/>
+                    <td ng-bind="item.visitorOut | date:'yyyy-MM-dd HH:mm:ss'"/>
+                    <td>
+                        <button class="moreBlue" ng-if="!item.visitorOut" ng-bind="'结束访问'" ng-click="concludeVisit(item)"></button>
+                        <span class="green" ng-if="item.visitorOut" ng-bind="'无操作'"></span>
+                    </td>
+                </tr>
+                <br>
+                </tbody>
+            </table>
+            <span style="color: red" ng-if="!arrayFlag" ng-bind="userManageResult"></span>
+        </div>
+
+        <div class="moreBlue" ng-if="userManageResult[0].pages > 0">
+            <span class="moreBlue" ng-bind="'共'+userManageResult[0].pages+'页'"></span>
+            <span ng-click="userManageList(1)">首页</span>
+            <span ng-if="pageNow > 1" ng-click="userManageList(pageNow - 1)"> << </span>
+            <span ng-bind="pageNow"></span>
+            <span ng-if="pageNow < userManageResult[0].pages"
+                  ng-click="userManageList(pageNow + 1)"> >> </span>
+            <span ng-click="userManageList(userManageResult[0].pages)">尾页</span>
+            <input type="text" ng-model="pageSearch" style="width: 4%"/>
+            <span ng-bind="'搜索'" ng-click="userManageList(pageSearch)"></span>
+        </div>
+    </div>
+</div>
+</body>
+
+<script>
+    var app = angular.module('app', ['ngResource']);
+    app.factory('UserApi', ['$resource', function ($resource) {
+        return $resource('/admin/login/:id', null, {});
+    }]);
+    app.controller("AppCtrl", function ($http, $scope) {
+        $scope.pageSearch = 2;
+        $scope.pageNow = 1;
+        var userManageParam = {
+            pageNow: '',
+            visitorName: '',
+            visitorSex: '',
+            visitorTelphone: '',
+            visitorIdCardNo: ''
+        };
+        $scope.userManageResult = [];
+        $scope.arrayFlag = false;
+
+        $http({
+            method: 'POST',
+            url: '/inOutRegister/mockSurvey/list',
+            data: userManageParam
+        }).then(function success(resp) {
+            $scope.userManageResult = resp.data;
+            if (Array.isArray($scope.userManageResult)) {
+                $scope.arrayFlag = true;
+            }
+        });
+
+        var userManageList = function (pageResult) {
+            if (pageResult != undefined) {
+                $scope.pageNow = pageResult;
+            }
+            $scope.arrayFlag = false;
+            userManageParam.pageNow = pageResult;
+            $http({
+                method: 'POST',
+                url: '/inOutRegister/mockSurvey/list',
+                data: userManageParam
+            }).then(function success(resp) {
+                $scope.userManageResult = resp.data;
+                if (Array.isArray($scope.userManageResult)) {
+                    $scope.arrayFlag = true;
+                }
+            });
+        };
+
+        var concludeVisit = function (visitor) {
+            $http({
+                method: 'POST',
+                url: '/inOutRegister/mockSurvey/concludeVisit',
+                data: visitor
+            }).then(function success(resp) {
+                window.alert(resp.data);
+                userManageList();
+            });
+        };
+
+        var goBack = function () {
+            window.history.go(-1);
+        };
+
+        angular.extend($scope, {
+            userManageParam: userManageParam,
+            userManageList: userManageList,
+            concludeVisit: concludeVisit,
+            goBack: goBack
+        });
+    });
+</script>
+
+</html>

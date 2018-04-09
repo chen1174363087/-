@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en" ng-app="app" ng-controller="AppCtrl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+    <META HTTP-EQUIV="Pragma" CONTENT="no-cache">
+    <META HTTP-EQUIV="Cache-Control" CONTENT="no-cache">
+    <META HTTP-EQUIV="Expires" CONTENT="0">
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+    <meta http-equiv="Content-Language" content="zh-CN"/>
+    <title>left</title>
+    <script src="/webjars/angular/1.5.8/angular.min.js"></script>
+    <script src="/webjars/angular-resource/1.5.8/angular-resource.min.js"></script>
+    <style type="text/css">
+        html, body {
+            width: 100%;
+            height: 100%;
+            margin: 0;
+        }
+
+        table, td, th {
+            border: 1px solid black;
+            text-align: center;
+        }
+
+        #contentRight {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            float: left;
+        }
+
+        @media screen and (max-width: 1600px) {
+            html {
+                font-size: 24px;
+            }
+
+            .moreBlue {
+                color: #009ceb;
+                font-size: 18px;
+            }
+
+            .green {
+                font-size: 18px;
+                color: #00B83F;
+            }
+        }
+
+        @media screen and (max-width: 1200px) {
+            html {
+                font-size: 20px;
+            }
+
+            .moreBlue {
+                color: #009ceb;
+                font-size: 14px;
+            }
+
+            .green {
+                font-size: 14px;
+                color: #00B83F;
+            }
+        }
+
+        @media screen and (max-width: 800px) {
+            html {
+                font-size: 16px;
+            }
+
+            .moreBlue {
+                color: #009ceb;
+                font-size: 10px;
+            }
+
+            .green {
+                font-size: 10px;
+                color: #00B83F;
+            }
+        }
+
+        @media screen and (max-width: 600px) {
+            html {
+                font-size: 14px;
+            }
+
+            .moreBlue {
+                color: #009ceb;
+                font-size: 8px;
+            }
+
+            .green {
+                font-size: 8px;
+                color: #00B83F;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div id="contentRight" align="center" ng-cloak>
+    <div style="margin-top: 20px">
+        <!--timeSearch-->
+        <div>
+            <form>
+                <span class="moreBlue" ng-bind="'起始时间'"></span>
+                <input type="date" ng-model="timeSearchListParam.startTime">
+                <span ng-bind="'-'"></span>
+                <span class="moreBlue" ng-bind="'结束时间'"></span>
+                <input type="date" ng-model="timeSearchListParam.endTime">
+                <button class="moreBlue" ng-click="timeSearchList(pageNow)" ng-bind="'确定'"
+                        ng-disabled="timeSearchListParam.startTime =='' || timeSearchListParam.endTime==''"></button>
+            </form>
+            <hr>
+
+            <table ng-if="arrayFlag" style="text-align: center" width="60%">
+                <thead class="moreBlue"/>
+                <tr>
+                    <td style="width: 20%">通知简介</td>
+                    <td style="width: 60%">通知内容</td>
+                    <td style="width: 20%">发布时间</td>
+                </tr>
+                <tbody ng-repeat="item in timeSearchResult">
+                <tr ng-class="{moreBlue: $index % 2 != 0 , green: $index % 2 == 0}">
+                    <td ng-bind="item.name"/>
+                    <td ng-bind="item.content"/>
+                    <td ng-bind="item.publishTime | date:'yyyy-MM-dd HH:mm'"/>
+                </tr>
+                <br>
+                </tbody>
+            </table>
+
+            <span ng-if="!arrayFlag" style="color: red" ng-bind="timeSearchResult"></span>
+
+            <div class="moreBlue" ng-if="timeSearchResult[0].pages > 1">
+                <span ng-click="timeSearchList(1)">首页</span>
+                <span ng-if="pageNow > 1" ng-click="timeSearchList(pageNow - 1)"> << </span>
+                <span ng-bind="pageNow"></span>
+                <span ng-if="pageNow < timeSearchResult[0].pages"
+                      ng-click="timeSearchList(pageNow + 1)"> >> </span>
+                <span ng-click="timeSearchList(timeSearchResult[0].pages)">尾页</span>
+            </div>
+        </div>
+
+    </div>
+</div>
+</body>
+
+<script>
+    var app = angular.module('app', ['ngResource']);
+    app.factory('UserApi', ['$resource', function ($resource) {
+        return $resource('/user/login/:id', null, {});
+    }]);
+    app.controller("AppCtrl", function ($http, $scope) {
+        var timeSearchListParam = {
+            startTime: '',
+            endTime: '',
+            page: ''
+        };
+        $scope.pageNow = 1;
+        $scope.timeSearchResult = [];
+
+        $scope.arrayFlag = false;
+        $http({
+            method: 'POST',
+            url: '/user/houseparent/timeSearch',
+            data: timeSearchListParam
+        }).then(function success(resp) {
+            $scope.timeSearchResult = resp.data;
+            if (Array.isArray($scope.timeSearchResult)) {
+                $scope.arrayFlag = true;
+            }
+        });
+
+        var timeSearchList = function (pageResult) {
+            if (pageResult != undefined) {
+                $scope.pageNow = pageResult;
+            }
+            if (timeSearchListParam.startTime > timeSearchListParam.endTime) {
+                window.alert('请选择正确时间！');
+                return;
+            }
+            $scope.arrayFlag = false;
+            timeSearchListParam.page = pageResult;
+            $http({
+                method: 'POST',
+                url: '/user/houseparent/timeSearch',
+                data: timeSearchListParam
+            }).then(function success(resp) {
+                $scope.timeSearchResult = resp.data;
+                if (Array.isArray($scope.timeSearchResult)) {
+                    $scope.arrayFlag = true;
+                }
+            });
+        };
+
+        angular.extend($scope, {
+            timeSearchList: timeSearchList,
+            timeSearchListParam: timeSearchListParam
+        });
+    });
+</script>
+
+</html>

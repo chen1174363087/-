@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="en" ng-app="app" ng-controller="AppCtrl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+    <META HTTP-EQUIV="Pragma" CONTENT="no-cache">
+    <META HTTP-EQUIV="Cache-Control" CONTENT="no-cache">
+    <META HTTP-EQUIV="Expires" CONTENT="0">
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+    <meta http-equiv="Content-Language" content="zh-CN"/>
+    <title>outdoorRepair</title>
+    <script src="/webjars/angular/1.5.8/angular.min.js"></script>
+    <script src="/webjars/angular-resource/1.5.8/angular-resource.min.js"></script>
+    <style type="text/css">
+        html, body {
+            width: 100%;
+            height: 100%;
+            margin: 0;
+            overflow-x: scroll;
+            overflow-y: scroll;
+        }
+
+        table, td, th {
+            border: 1px solid black;
+            text-align: center;
+        }
+
+        #contentRight {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            float: left;
+            background: #F5F5F5;
+            overflow-x: scroll;
+            overflow-y: scroll;
+        }
+
+        @media screen and (max-width: 1600px) {
+            html {
+                font-size: 24px;
+            }
+
+            .moreBlue {
+                color: #009ceb;
+                font-size: 18px;
+            }
+
+            .green {
+                font-size: 18px;
+                color: #00B83F;
+            }
+        }
+
+        @media screen and (max-width: 1200px) {
+            html {
+                font-size: 20px;
+            }
+
+            .moreBlue {
+                color: #009ceb;
+                font-size: 14px;
+            }
+
+            .green {
+                font-size: 14px;
+                color: #00B83F;
+            }
+        }
+
+        @media screen and (max-width: 800px) {
+            html {
+                font-size: 16px;
+            }
+
+            .moreBlue {
+                color: #009ceb;
+                font-size: 10px;
+            }
+
+            .green {
+                font-size: 10px;
+                color: #00B83F;
+            }
+        }
+
+        @media screen and (max-width: 600px) {
+            html {
+                font-size: 14px;
+            }
+
+            .moreBlue {
+                color: #009ceb;
+                font-size: 8px;
+            }
+
+            .green {
+                font-size: 8px;
+                color: #00B83F;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div id="contentRight" align="center" ng-cloak>
+    <div style="margin-top: 20px">
+        <div>
+            <span style="margin-left: 1%;float: left" class="green" ng-bind="'| 添加用户'"></span>
+            <span style="margin-right: 1%;float: right" class="green" ng-bind="'返回》'" ng-click="goBack()"></span>
+            <table style="text-align: center; width: 98%">
+                <thead class="moreBlue"/>
+                <tr>
+                    <td style="width: 5%">序号</td>
+                    <td style="width: 15%">学号</td>
+                    <td style="width: 10%">姓名</td>
+                    <td style="width: 10%">性别</td>
+                    <td style="width: 10%">班级</td>
+                    <td style="width: 15%">手机号</td>
+                    <td style="width: 10%">楼栋</td>
+                    <td style="width: 10%">房间号</td>
+                    <td style="width: 15%">操作</td>
+                </tr>
+
+                <tbody>
+                <tr ng-if="outdoorRepairApplyParams.length > 0"
+                    ng-class="{green: $index % 2 == 0, moreBlue:$index % 2 != 0}"
+                    ng-repeat="item in outdoorRepairApplyParams track by $index">
+                    <td ng-bind="$index+1"></td>
+                    <td ng-bind="item.studentId"></td>
+                    <td ng-bind="item.studentName"></td>
+                    <td ng-bind="item.studentSex"></td>
+                    <td ng-bind="item.studentClass"></td>
+                    <td ng-bind="item.studentTelPhone"></td>
+                    <td ng-bind="item.studentBuildingName"></td>
+                    <td ng-bind="item.studentRoomName"></td>
+                    <td>
+                        <button class="moreBlue" ng-bind="'删除'" ng-click="deleteParam($index)"></button>
+                    </td>
+                </tr>
+
+                <tr ng-class="{green: $index % 2 == 0, moreBlue:$index % 2 != 0}">
+                    <td style="text-align: center" ng-bind="outdoorRepairApplyParams.length+1"></td>
+
+                    <td style="text-align: center">
+                        <input type="text" id="{{'id'+outdoorRepairApplyParams.length}}" placeholder="学号">
+                    </td>
+                    <td style="text-align: center">
+                        <input type="text" id="{{'name'+outdoorRepairApplyParams.length}}" placeholder="姓名">
+                    </td>
+                    <td style="text-align: center">
+                        <input type="text" id="{{ 'sex'+outdoorRepairApplyParams.length }}" placeholder="性别">
+                    </td>
+                    <td style="text-align: center">
+                        <input type="text" id="{{'class'+outdoorRepairApplyParams.length}}" placeholder="班级">
+                    </td>
+                    <td style="text-align: center">
+                        <input type="text" id="{{'telPhone'+outdoorRepairApplyParams.length}}" placeholder="手机号">
+                    </td>
+
+                    <td>
+                        <select id="{{'buildingName'+outdoorRepairApplyParams.length}}" style="width: 100%">
+                            <option class="moreBlue" style="border: none"
+                                    ng-repeat="option in outdoorRepairApplyCategory"
+                                    value="{{option}}"
+                                    ng-bind="option"></option>
+                        </select>
+                    </td>
+                    <td>
+                        <input id="{{'roomName'+outdoorRepairApplyParams.length}}" style="width: 98%" type="text"
+                               placeholder="房间编号"/>
+                    </td>
+                    <td>
+                        <button class="moreBlue" ng-bind="'提交'" ng-click="postOutdoorRepairApply()"></button>
+                       &nbsp;
+                        <button class="green" ng-bind="'继续申请'"
+                                ng-click="addCountOfApplication(outdoorRepairApplyParams.length)"></button>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+
+    </div>
+</div>
+</body>
+
+<script>
+    var app = angular.module('app', ['ngResource']);
+    app.factory('UserApi', ['$resource', function ($resource) {
+        return $resource('/user/login/:id', null, {});
+    }]);
+    app.controller("AppCtrl", function ($http, $scope, $interval, $document) {
+        var outdoorRepairApplyCategory = [];
+        $http({
+            method:'GET',
+            url:'/apartmentManage/building/searchBuilding'
+        }).then(function success(resp){
+            outdoorRepairApplyCategory.push('所有');
+            angular.forEach(resp.data,function (value,index){
+                outdoorRepairApplyCategory.push(value.buildingName);
+            });
+        });
+
+        var outdoorRepairApplyParams = [];
+
+        var addCountOfApplication = function (length) {
+            var outdoorRepairApplyParam = {
+                studentId: '',
+                studentName: '',
+                studentSex: '',
+                studentTelPhone: '',
+                studentClass: '',
+                studentRoomName: '',
+                studentBuildingName: ''
+            };
+            if (length == undefined) {
+                length = 0;
+            }
+            var selectId = "buildingName" + length;
+            var studentId = "id" + length;
+            var studentName = "name" + length;
+            var studentSex = "sex" + length;
+            var studentClass = "class" + length;
+            var studentTelPhoe = "telPhone" + length;
+            var studentRoomName = "roomName" + length;
+            var options = $document[0].getElementById(selectId);
+            var selectedIndex = options.selectedIndex;
+            outdoorRepairApplyParam.studentBuildingName = options[selectedIndex].value;
+
+            outdoorRepairApplyParam.studentId = $document[0].getElementById(studentId).value;
+            outdoorRepairApplyParam.studentName = $document[0].getElementById(studentName).value;
+            outdoorRepairApplyParam.studentSex = $document[0].getElementById(studentSex).value;
+            outdoorRepairApplyParam.studentTelPhone = $document[0].getElementById(studentTelPhoe).value;
+            outdoorRepairApplyParam.studentClass = $document[0].getElementById(studentClass).value;
+            outdoorRepairApplyParam.studentRoomName = $document[0].getElementById(studentRoomName).value;
+
+            outdoorRepairApplyParams.push(outdoorRepairApplyParam);
+            console.log(outdoorRepairApplyParams);
+        };
+
+        var deleteParam = function (index) {
+            angular.forEach(outdoorRepairApplyParams, function (value, innerIndex) {
+                if (innerIndex == index) {
+                    outdoorRepairApplyParams.splice(innerIndex, 1);
+                }
+            });
+        };
+        var postOutdoorRepairApply = function () {
+            if (outdoorRepairApplyParams.length < 1) {
+                addCountOfApplication();
+            }
+            $http({
+                method: 'POST',
+                url: '/systemManage/userManage/addUser',
+                data: outdoorRepairApplyParams
+            }).then(
+                function success(resp) {
+                    window.location.href = '/systemManage/userManage'
+                }
+            );
+        };
+
+        var goBack = function () {
+            window.history.go(-1)
+        };
+        angular.extend($scope, {
+            outdoorRepairApplyCategory: outdoorRepairApplyCategory,
+            addCountOfApplication: addCountOfApplication,
+            postOutdoorRepairApply: postOutdoorRepairApply,
+            outdoorRepairApplyParams: outdoorRepairApplyParams,
+            deleteParam: deleteParam,
+            goBack: goBack
+        });
+    })
+    ;
+</script>
+
+</html>

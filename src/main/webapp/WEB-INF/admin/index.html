@@ -1,0 +1,434 @@
+<!DOCTYPE html>
+<html lang="en" ng-app="app" ng-controller="AppCtrl">
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+    <META HTTP-EQUIV="Pragma" CONTENT="no-cache">
+    <META HTTP-EQUIV="Cache-Control" CONTENT="no-cache">
+    <META HTTP-EQUIV="Expires" CONTENT="0">
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+    <meta http-equiv="Content-Language" content="zh-CN"/>
+    <title>index</title>
+    <script src="/webjars/angular/1.5.8/angular.min.js"></script>
+    <script src="/webjars/angular-resource/1.5.8/angular-resource.min.js"></script>
+    <!-- <script src="../js/w3.js"></script>-->
+    <style type="text/css">
+        html, body {
+            width: 100%;
+            height: 100%;
+            margin: 0;
+        }
+
+        table, td, th {
+            border: 1px solid black;
+            text-align: center;
+        }
+
+        #Container {
+            position: relative;
+            width: 100%;
+            height: 100%;
+        }
+
+        #Header {
+            position: relative;
+            width: 100%;
+            height: 8%;
+            background-color: #00b3ee;
+        }
+
+        #Content {
+            position: relative;
+            width: 100%;
+            height: 92%;
+        }
+
+        #contentLeft {
+            position: relative;
+            width: 15%;
+            height: 100%;
+            float: left;
+        }
+
+        #contentRight {
+            position: relative;
+            width: 85%;
+            height: 100%;
+            float: left;
+        }
+
+        hr.style-one {
+            border: 0;
+            height: 1px;
+            background: #333;
+            background-image: linear-gradient(to right, #ccc, #333, #ccc);
+        }
+
+        @media screen and (max-width: 1600px) {
+            html {
+                font-size: 24px;
+            }
+
+            .moreBlue {
+                color: #009ceb;
+                font-size: 18px;
+            }
+
+            .green {
+                font-size: 18px;
+                color: #00B83F;
+            }
+        }
+
+        @media screen and (max-width: 1200px) {
+            html {
+                font-size: 20px;
+            }
+
+            .moreBlue {
+                color: #009ceb;
+                font-size: 14px;
+            }
+
+            .green {
+                font-size: 14px;
+                color: #00B83F;
+            }
+        }
+
+        @media screen and (max-width: 800px) {
+            html {
+                font-size: 16px;
+            }
+
+            .moreBlue {
+                color: #009ceb;
+                font-size: 10px;
+            }
+
+            .green {
+                font-size: 10px;
+                color: #00B83F;
+            }
+        }
+
+        @media screen and (max-width: 600px) {
+            html {
+                font-size: 14px;
+            }
+
+            .moreBlue {
+                color: #009ceb;
+                font-size: 8px;
+            }
+
+            .green {
+                font-size: 8px;
+                color: #00B83F;
+            }
+        }
+    </style>
+</head>
+<body>
+<div id="Container">
+    <div id="Header">
+        <div style="margin-top: 5px; margin-left: 10px; float: left;">
+            <span style="color: #EEF4F9;">大学生宿舍管理系统</span>
+        </div>
+
+        <div style="margin-top: 5px; margin-right: 10px; float: right">
+            <span style="color: #EEF4F9;" ng-click="logout()">安全退出》</span>
+        </div>
+    </div>
+
+
+    <div id="Content">
+        <div id="contentLeft" align="center" style="">
+            <ul ng-repeat="item in menus" ng-init="outIndex = $index">
+                <li style="float: left" ng-class="{moreBlue: !item.flag , green: item.flag}" ng-bind="item.name"
+                    ng-click="solveSecondMenus(item.name,$index)">
+                </li>
+                <br>
+                <ul style="list-style-type:square" ng-if="item.flag" ng-repeat="innerItem in item.secondMenu"
+                    ng-init="innerIndex = $index">
+                    <li ng-class="{moreBlue: !innerItem.flag , green: innerItem.flag}" style="float: left"
+                        ng-bind="innerItem.name"
+                        ng-click="getResource(outIndex,innerIndex,innerItem.url)"></li>
+                    <br>
+                </ul>
+            </ul>
+            <hr class="style-one">
+        </div>
+
+        <div id="contentRight" align="center">
+            <hr style="float: left; width:1px;height: 100%">
+            <!--<div id="html" ng-bind-html=''></div>-->
+            <div style="margin-top: 20px">
+                <!--timeSearch-->
+                <div align="" ng-if="menus[0].secondMenu[0].flag">
+                    <form>
+                        <span class="moreBlue" ng-bind="'起始时间'"></span>
+                        <input type="date" ng-model="timeSearchListParam.startTime">
+                        <span ng-bind="'-'"></span>
+                        <span class="moreBlue" ng-bind="'结束时间'"></span>
+                        <input type="date" ng-model="timeSearchListParam.endTime">
+                        <button class="moreBlue" ng-click="timeSearchList(pageNow)" ng-bind="'确定'"></button>
+                    </form>
+                    <hr>
+
+                    <table ng-if="arrayFlag">
+                        <thead class="moreBlue" style="text-align: center"/>
+                        <tr>
+                            <td style="width: 20%">通知简介</td>
+                            <td style="width: 60%">通知内容</td>
+                            <td style="width: 20%">发布时间</td>
+                        </tr>
+                        <tbody ng-repeat="item in houseparent[0].result">
+                        <tr ng-class="{moreBlue: $index % 2 != 0 , green: $index % 2 == 0}">
+                            <td ng-bind="item.name"/>
+                            <td ng-bind="item.content"/>
+                            <td ng-bind="item.publishTime | date:'yyyy-MM-dd HH:mm'"/>
+                        </tr>
+                        <br>
+                        </tbody>
+                    </table>
+
+                    <span ng-if="!arrayFlag" style="color: red" ng-bind="houseparent[0].result"></span>
+
+                    <div class="moreBlue" ng-if="houseparent[0].result[0].pages > 1">
+                        <span ng-click="timeSearchList(1)">首页</span>
+                        <span ng-if="pageNow > 1" ng-click="timeSearchList(pageNow - 1)"> << </span>
+                        <span ng-bind="pageNow"></span>
+                        <span ng-if="pageNow < houseparent[0].result[0].pages" ng-click="timeSearchList(pageNow + 1)"> >> </span>
+                        <span ng-click="timeSearchList(houseparent[0].result[0].pages)">尾页</span>
+                    </div>
+                </div>
+
+
+                <!--categorySearch-->
+                <div align="" ng-if="menus[0].secondMenu[1].flag">
+
+                </div>
+
+                <!--categorySearch-->
+                <div align="" ng-if="menus[0].secondMenu[1].flag">
+
+                </div>
+
+                <!--categorySearch-->
+                <div align="" ng-if="menus[0].secondMenu[1].flag">
+
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+</div>
+<script>
+    var app = angular.module('app', ['ngResource']);
+    app.factory('UserApi', ['$resource', function ($resource) {
+        return $resource('/user/login/:id', null, {});
+    }]);
+    app.controller("AppCtrl", function ($http, $scope, $interval, UserApi, $document, $timeout) {
+        var w3 = {};
+        var menus = [{
+            flag: false,
+            name: '宿管通知',
+            secondMenu: []
+        },
+            {
+                flag: false,
+                name: '物品报修',
+                secondMenu: []
+            },
+            {
+                flag: false,
+                name: '换寝申请',
+                secondMenu: []
+            },
+            {
+                flag: false,
+                name: '评分查询',
+                secondMenu: []
+            }
+        ];
+
+        var clearOthers = function (innerIndex) {
+            angular.forEach(menus, function (value, Index) {
+                value.secondMenu = '';
+                //使自己相反，其它为否
+                if (Index === innerIndex) {
+                    value.flag = !value.flag;
+                } else {
+                    value.flag = false;
+                }
+            });
+        };
+
+        var solveSecondMenus = function (firstMenu, index) {
+            clearOthers(index);
+            switch (firstMenu) {
+                case '宿管通知':
+                    menus[index].secondMenu = [
+                        {
+                            name: '时间查询',
+                            flag: false
+                        }
+                    ];
+                    break;
+                case '物品报修':
+                    menus[index].secondMenu = [{
+                        name: '室内报修',
+                        flag: false
+                    },
+                        {
+                            name: '室外报修',
+                            flag: false
+                        }
+                    ];
+                    break;
+                case '换寝申请':
+                    menus[index].secondMenu = [{
+                        name: '个人申请',
+                        flag: false
+                    }
+                    ];
+                    break;
+                case '评分查询':
+                    menus[index].secondMenu = [{
+                        name: '得分查询',
+                        flag: false
+                    },
+                        {
+                            name: '得分排名',
+                            flag: false
+                        }
+                    ];
+                    break;
+            }
+        };
+
+        var getResource = function (outIndex, innerIndex, url) {
+            console.log(outIndex, innerIndex);
+            $scope.pageNow = 1;
+            angular.forEach(menus[outIndex].secondMenu, function (value, index) {
+                if (index === innerIndex) {
+                    value.flag = !value.flag;
+                } else {
+                    value.flag = false;
+                }
+            });
+
+            //go2Html(url);
+        };
+
+        var go2Html = function (url) {
+            var divId = 'html';
+            console.log($document[0].getElementById(divId));
+            $document[0].getElementById(divId).setAttribute(
+                "ng-bind-html", url);
+            w3.includeHTMLs('', divId);
+        };
+
+        w3.includeHTMLs = function (cb, tagId) {
+            var z, i, file, xhttp;
+            z = document.getElementById(tagId);
+            console.log(z);
+            file = z.getAttribute("ng-bind-html");
+            if (file) {
+                xhttp = new XMLHttpRequest();
+                xhttp.onreadystatechange = function () {
+                    if (this.readyState == 4) {
+                        if (this.status == 200) {
+                            z.innerHTML = this.responseText;
+                        }
+                        if (this.status == 404) {
+                            z.innerHTML = "Page not found.";
+                        }
+                        z.removeAttribute("ng-bind-html");
+                        w3.includeHTMLs(cb);
+                    }
+                };
+                xhttp.open("GET", file, true);
+                xhttp.send();
+                return;
+            }
+            // }
+            if (cb) {
+                cb();
+            }
+        };
+
+        var logout = function () {
+            $http({
+                method: 'GET',
+                url: '/user/logout',
+            }).then(function success(resp) {
+                window.location.href = '/user/reLogin';
+            });
+        };
+
+        var houseparent = [
+            {name: 'timeSearch', result: ''},
+            {name: 'indoorRepair', result: ''},
+            {name: 'outdoorRepair', result: ''},
+            {name: 'changeOfDormitoryApply', result: ''}
+        ];
+
+        var timeSearchListParam = {
+            startTime: '',
+            endTime: '',
+            page: ''
+        };
+
+        var timeSearchList = function (pageResult) {
+            console.log($scope.pageNow)
+            $scope.arrayFlag = false;
+            if (pageResult != undefined) {
+                $scope.pageNow = pageResult;
+            }
+            $scope.houseparent[0].result = null;
+            timeSearchListParam.page = pageResult;
+            console.log(timeSearchListParam);
+            $http({
+                method: 'POST',
+                url: '/user/houseparent/timeSearch',
+                data: timeSearchListParam
+            }).then(function success(resp) {
+                $scope.houseparent[0].result = resp.data;
+                if (Array.isArray(houseparent[0].result)) {
+                    $scope.arrayFlag = true;
+                }
+            });
+        };
+
+        var changeOfDormitoryApplyGetParam = [];
+        var GetChangeOfDormitoryApply = function () {
+            $http({
+                method: 'GET' ,
+                url: '/user/houseparent/GetChangeOfDormitoryApply'
+            }).then(
+                function success(resp) {
+                    changeOfDormitoryApplyGetParam = resp.data;
+                }
+            );
+        };
+        GetChangeOfDormitoryApply();
+        angular.extend($scope, {
+            w3: w3,
+            menus: menus,
+            solveSecondMenus: solveSecondMenus,
+            clearOthers: clearOthers,
+            getResource: getResource,
+            logout: logout,
+            go2Html: go2Html,
+            houseparent: houseparent,
+            timeSearchList: timeSearchList,
+            timeSearchListParam: timeSearchListParam,
+            changeOfDormitoryApplyGetParam: changeOfDormitoryApplyGetParam,
+            GetChangeOfDormitoryApply: GetChangeOfDormitoryApply
+        });
+    });
+</script>
+</body>
+</html>

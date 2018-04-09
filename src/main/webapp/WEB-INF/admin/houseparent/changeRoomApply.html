@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="en" ng-app="app" ng-controller="AppCtrl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+    <META HTTP-EQUIV="Pragma" CONTENT="no-cache">
+    <META HTTP-EQUIV="Cache-Control" CONTENT="no-cache">
+    <META HTTP-EQUIV="Expires" CONTENT="0">
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+    <meta http-equiv="Content-Language" content="zh-CN"/>
+    <title>changeRoom</title>
+    <script src="/webjars/angular/1.5.8/angular.min.js"></script>
+    <script src="/webjars/angular-resource/1.5.8/angular-resource.min.js"></script>
+    <style type="text/css">
+        html, body {
+            width: 100%;
+            height: 100%;
+            margin: 0;
+        }
+
+        tbody, tr, td {
+            border: 1px solid black;
+            text-align: center;
+        }
+
+        #contentRight {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            float: left;
+        }
+
+        @media screen and (max-width: 1600px) {
+            html {
+                font-size: 24px;
+            }
+
+            .moreBlue {
+                color: #009ceb;
+                font-size: 18px;
+            }
+
+            .green {
+                font-size: 18px;
+                color: #00B83F;
+            }
+        }
+
+        @media screen and (max-width: 1200px) {
+            html {
+                font-size: 20px;
+            }
+
+            .moreBlue {
+                color: #009ceb;
+                font-size: 14px;
+            }
+
+            .green {
+                font-size: 14px;
+                color: #00B83F;
+            }
+        }
+
+        @media screen and (max-width: 800px) {
+            html {
+                font-size: 16px;
+            }
+
+            .moreBlue {
+                color: #009ceb;
+                font-size: 10px;
+            }
+
+            .green {
+                font-size: 10px;
+                color: #00B83F;
+            }
+        }
+
+        @media screen and (max-width: 600px) {
+            html {
+                font-size: 14px;
+            }
+
+            .moreBlue {
+                color: #009ceb;
+                font-size: 8px;
+            }
+
+            .green {
+                font-size: 8px;
+                color: #00B83F;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div id="contentRight" align="center" ng-cloak>
+    <div style="margin-top: 20px">
+        <!--changeRoom-->
+        <div>
+            <span class="moreBlue" ng-bind="'请选择...'"></span>
+            <select id="select" class="green" style="width: 53%" >
+                <option ng-repeat="item in roomNumbers" ng-bind="item" value="{{item}}"
+                ></option>
+            </select>
+            <button class="moreBlue" ng-bind="'确认'" ng-click="postChangeOfDormitoryApply()"> </button>
+            <hr>
+            <span style="align-self: center" class="moreBlue" ng-bind="'您和未来的室友'"></span>
+            <table ng-if="roomMates" style="text-align: center; width: 60%">
+                <thead>
+                <tr class="green">
+                    <td ng-bind="'姓名'"/>
+                    <td ng-bind="'学号'"/>
+                </tr>
+                </thead>
+                <tbody>
+                <tr ng-repeat="item in roomMates track by $index">
+                    <td ng-bind="item.name" ng-class="{moreBlue: $index % 2 == 0 , green: $index % 2 != 0 }"/>
+                    <td ng-bind="item.studentId" ng-class="{moreBlue: $index % 2 == 0 , green: $index % 2 != 0 }"/>
+                </tr>
+                </tbody>
+            </table>
+
+        </div>
+
+    </div>
+</div>
+</body>
+
+<script>
+    var app = angular.module('app', ['ngResource']);
+    app.factory('UserApi', ['$resource', function ($resource) {
+        return $resource('/user/login/:id', null, {});
+    }]);
+    app.controller("AppCtrl", function ($http, $scope, $document, $interval) {
+        var changeRoomApplyResult = [];
+
+        var getChangeOfDormitoryApply = function () {
+            $http({
+                method: 'GET',
+                url: '/user/houseparent/changeOfDormitoryApply'
+            }).then(
+                function success(resp) {
+                    changeRoomApplyResult = resp.data;
+                    console.log(changeRoomApplyResult);
+                    $scope.roomNumbers = [];
+                    angular.forEach(changeRoomApplyResult, function (value, index) {
+                        $scope.roomNumbers.push(value[0].roomNumber);
+                    });
+                }
+            );
+        };
+        getChangeOfDormitoryApply();
+
+        var changeRoomApplyParam = {
+            roomNumber: '',
+            applicationTitle: '更换宿舍',
+            applicationContent: '希望更换宿舍到'
+        };
+
+        var roomMates = [];
+        $interval(function () {
+            var options = $document[0].getElementById('select');
+            var selectedIndex = options.selectedIndex;
+            console.log(selectedIndex);
+            changeRoomApplyParam.roomNumber = options[selectedIndex].value;
+            console.log(changeRoomApplyParam);
+            roomMates.splice(0, roomMates.length);
+            angular.forEach(changeRoomApplyResult, function (value, index) {
+                if (value[0].roomNumber == changeRoomApplyParam.roomNumber) {
+                    angular.forEach(value, function (innerValue, innerIndex) {
+                        roomMates.push(innerValue);
+                    });
+                }
+            });
+        }, 100);
+
+        var postChangeOfDormitoryApply = function () {
+            $http({
+                method: 'POST',
+                url: '/user/houseparent/changeOfDormitoryApply',
+                data: changeRoomApplyParam
+            }).then(function success(resp) {
+                window.alert(resp.data);
+                getChangeOfDormitoryApply();
+            });
+        };
+
+        angular.extend($scope, {
+            changeRoomApplyResult: changeRoomApplyResult,
+            getChangeOfDormitoryApply: getChangeOfDormitoryApply,
+            changeRoomApplyParam: changeRoomApplyParam,
+            roomMates: roomMates,
+            postChangeOfDormitoryApply: postChangeOfDormitoryApply
+        });
+    });
+</script>
+
+</html>

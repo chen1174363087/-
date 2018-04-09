@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html lang="en" ng-app="app" ng-controller="AppCtrl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+    <META HTTP-EQUIV="Pragma" CONTENT="no-cache">
+    <META HTTP-EQUIV="Cache-Control" CONTENT="no-cache">
+    <META HTTP-EQUIV="Expires" CONTENT="0">
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+    <meta http-equiv="Content-Language" content="zh-CN"/>
+    <title>employee</title>
+    <script src="/webjars/angular/1.5.8/angular.min.js"></script>
+    <script src="/webjars/angular-resource/1.5.8/angular-resource.min.js"></script>
+    <style type="text/css">
+        html, body {
+            width: 100%;
+            height: 100%;
+            margin: 0;
+            overflow-x: scroll;
+            overflow-y: scroll;
+        }
+
+        /*要弹出板块*/
+        .white_content {
+            display: none;
+            position: absolute;
+            background-color: #fef7ec;
+            top: 7%;
+            left: 25%;
+            width: 50%;
+            height: 55%;
+            border: 8px solid #D6E9F1;
+            z-index: 1002;
+            overflow-x: scroll;
+            overflow-y: scroll;
+        }
+
+        /*关闭*/
+        .update {
+            text-align: center;
+            clear: both;
+            width: 10%;
+            margin: 0 0 6px 0;
+            color: #009ceb;
+        }
+
+        .black_overlay {
+            display: none;
+            position: absolute;
+            top: 0%;
+            left: 0%;
+            width: 100%;
+            height: 100%;
+            background-color: #f5f5f5;
+            z-index: 1001;
+            -moz-opacity: 0.8;
+            opacity: .80;
+            filter: alpha(opacity=80);
+        }
+
+        .spanLeft {
+            margin-left: 10px;
+            float: left
+        }
+
+        .inputLeft {
+            margin-right: 10px;
+            float: right;
+            width: 80%;
+        }
+
+        table, td, th {
+            border: 1px solid black;
+            text-align: center;
+        }
+
+        #contentRight {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            float: left;
+            background: #F5F5F5;
+            overflow-x: scroll;
+            overflow-y: scroll;
+        }
+
+        @media screen and (max-width: 1600px) {
+            html {
+                font-size: 24px;
+            }
+
+            .moreBlue {
+                color: #009ceb;
+                font-size: 18px;
+            }
+
+            .green {
+                font-size: 18px;
+                color: #00B83F;
+            }
+        }
+
+        @media screen and (max-width: 1200px) {
+            html {
+                font-size: 20px;
+            }
+
+            .moreBlue {
+                color: #009ceb;
+                font-size: 14px;
+            }
+
+            .green {
+                font-size: 14px;
+                color: #00B83F;
+            }
+        }
+
+        @media screen and (max-width: 800px) {
+            html {
+                font-size: 16px;
+            }
+
+            .moreBlue {
+                color: #009ceb;
+                font-size: 10px;
+            }
+
+            .green {
+                font-size: 10px;
+                color: #00B83F;
+            }
+        }
+
+        @media screen and (max-width: 600px) {
+            html {
+                font-size: 14px;
+            }
+
+            .moreBlue {
+                color: #009ceb;
+                font-size: 8px;
+            }
+
+            .green {
+                font-size: 8px;
+                color: #00B83F;
+            }
+        }
+    </style>
+
+</head>
+<body>
+
+<div id="contentRight" align="center" ng-cloak>
+    <div style="margin-top: 20px">
+        <div>
+            <span style="margin-left: 1%;float: left" class="green" ng-bind="'| 员工列表'"></span>
+            <button style="margin-right: 1%;float: right" class="green" ng-bind="'添加员工'" ng-click="addUser()"></button>
+            <table style="text-align: center" width="98%">
+                <thead class="moreBlue"/>
+                <tr>
+                    <td style="width: 5%">序号</td>
+                    <td style="width: 10%">工号</td>
+                    <td style="width: 10%">姓名</td>
+                    <td style="width: 10%">性别</td>
+                    <td style="width: 10%">年龄</td>
+                    <td style="width: 10%">手机号</td>
+                    <td style="width: 15%">居住地</td>
+                    <td style="width: 15%">身份证号</td>
+                    <td style="width: 15%">操作</td>
+                </tr>
+                <tbody  ng-if="arrayFlag" ng-repeat="item in userManageResult track by $index">
+                <tr ng-class="{moreBlue: $index % 2 != 0 , green: $index % 2 == 0}">
+                    <td ng-bind="$index + 1"/>
+                    <td ng-bind="item.employeeId"/>
+                    <td ng-bind="item.employeeName"/>
+                    <td ng-bind="item.employeeSex" />
+                    <td ng-bind="item.employeeAge"/>
+                    <td ng-bind="item.employeeTelPhone"/>
+                    <td ng-bind="item.employeeAddress"/>
+                    <td ng-bind="item.employeeCertificateNumber"/>
+                    <td>
+                        <button class="moreBlue" ng-bind="'修改|删除'" ng-click="updateUser('light',item)"></button>
+                    </td>
+                </tr>
+                <br>
+                </tbody>
+            </table>
+
+            <span ng-if="!arrayFlag" style="color: red" ng-bind="userManageResult"></span>
+
+            <div class="moreBlue" ng-if="userManageResult[0].pages > 0">
+                <span class="moreBlue" ng-bind="'共'+userManageResult[0].pages+'页'"></span>
+                <span ng-click="userManageList(1)">首页</span>
+                <span ng-if="pageNow > 1" ng-click="userManageList(pageNow - 1)"> << </span>
+                <span ng-bind="pageNow"></span>
+                <span ng-if="pageNow < userManageResult[0].pages"
+                      ng-click="userManageList(pageNow + 1)"> >> </span>
+                <span ng-click="userManageList(userManageResult[0].pages)">尾页</span>
+                <input type="text" ng-model="pageSearch" style="width: 4%"/>
+                <span ng-bind="'搜索'" ng-click="userManageList(pageSearch)"></span>
+            </div>
+        </div>
+
+        <div id="light" class="white_content" style="border-radius: 20px">
+            <form class="moreBlue">
+                <span class="spanLeft">工号</span>
+                <input class="inputLeft" type="text" ng-model="updatedUser.employeeId" placeholder="{{updatedUser.employeeId}}" />
+                <br>
+                <span class="spanLeft">姓名</span>
+                <input class="inputLeft" type="text" ng-model="updatedUser.employeeName" placeholder="{{updatedUser.employeeName}}" />
+                <br>
+                <span class="spanLeft">性别</span>
+                <input class="inputLeft" type="text" ng-model="updatedUser.employeeSex" placeholder="updatedUser.employeeSex"  />
+
+                <br>
+                <span class="spanLeft">年龄</span>
+                <input class="inputLeft" type="text" ng-model="updatedUser.employeeAge" placeholder="{{updatedUser.employeeAge}}" />
+                <br>
+                <span class="spanLeft">手机号</span>
+                <input class="inputLeft" type="text" ng-model="updatedUser.employeeTelPhone" placeholder="{{updatedUser.employeeTelPhone}}" />
+                <br>
+                <span class="spanLeft">居住地</span>
+                <input class="inputLeft" type="text" ng-model="updatedUser.employeeAddress"
+                       placeholder="{{updatedUser.employeeAddress}}"/>
+                <br>
+                <span class="spanLeft">身份证号</span>
+                <input class="inputLeft" type="text" ng-model="updatedUser.employeeCertificateNumber"
+                       placeholder="{{updatedUser.employeeCertificateNumber}}"/>
+            </form>
+            <br>
+            <button style="text-align: center" type="button" class="update"
+                    ng-click="updateUserPost(updatedUser)"
+                    ng-bind="'修改'"></button>
+            <button style="text-align: center" type="button" class="update"
+                    ng-click="deleteUserPost(updatedUser)"
+                    ng-bind="'删除'"></button>
+            <button style="text-align: center" type="button" class="update" ng-click="cancel('light')"
+                    ng-bind="'取消'"></button>
+        </div>
+
+        <div id="fade" class="black_overlay">
+        </div>
+    </div>
+</div>
+</body>
+
+<script>
+    var app = angular.module('app', ['ngResource']);
+    app.factory('UserApi', ['$resource', function ($resource) {
+        return $resource('/admin/login/:id', null, {});
+    }]);
+    app.controller("AppCtrl", function ($http, $scope, $document) {
+        var userManageParam = {
+            pageNow: ''
+        };
+        $scope.pageSearch = 2;
+        $scope.pageNow = 1;
+        $scope.userManageResult = [];
+
+        $scope.arrayFlag = false;
+        $http({
+            method: 'POST',
+            url: '/apartmentManage/employee',
+            data: userManageParam
+        }).then(function success(resp) {
+            $scope.userManageResult = resp.data;
+            if (Array.isArray($scope.userManageResult)) {
+                $scope.arrayFlag = true;
+            }
+        });
+
+        var userManageList = function (pageResult) {
+            if (pageResult != undefined) {
+                $scope.pageNow = pageResult;
+            }
+            $scope.arrayFlag = false;
+            userManageParam.pageNow = pageResult;
+            $http({
+                method: 'POST',
+                url: '/apartmentManage/employee',
+                data: userManageParam
+            }).then(function success(resp) {
+                $scope.userManageResult = resp.data;
+                if (Array.isArray($scope.userManageResult)) {
+                    $scope.arrayFlag = true;
+                }
+            });
+        };
+
+        var updateUser = function (tag, thisUser) {
+            $scope.updatedUser = thisUser;
+            var light = $document[0].getElementById(tag);
+            var fade = $document[0].getElementById('fade');
+            light.style.display = 'block';
+            fade.style.display = 'block';
+        };
+
+        var updateUserPost = function (thisUser) {
+            $http({
+                method: 'POST',
+                url: '/apartmentManage/employee/updateEmployee',
+                data: thisUser
+            }).then(function success(resp) {
+                window.alert(resp.data);
+                cancel('light');
+        });
+        };
+
+        var deleteUserPost = function (thisUser) {
+            $http({
+                method: 'POST',
+                url: '/apartmentManage/employee/deleteEmployee',
+                data: thisUser
+            }).then(function success(resp) {
+                window.alert(resp.data);
+                cancel('light');
+            });
+        };
+
+        var cancel = function (tag) {
+            var light = $document[0].getElementById(tag);
+            var fade = $document[0].getElementById('fade');
+            light.style.display = 'none';
+            fade.style.display = 'none';
+            window.location.href = '/apartmentManage/employee'
+        };
+
+        var addUser = function () {
+            window.location.href = '/apartmentManage/employee/addEmployee.html'
+        };
+
+        angular.extend($scope, {
+            userManageParam: userManageParam,
+            userManageList: userManageList,
+            updateUser: updateUser,
+            updateUserPost: updateUserPost,
+            deleteUserPost: deleteUserPost,
+            addUser: addUser,
+            cancel: cancel
+        });
+    });
+</script>
+
+</html>

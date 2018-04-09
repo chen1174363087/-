@@ -1,0 +1,588 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.chenxin.houseparent.dao.AdminDao">
+    <!-- resultType="com.alibaba.fastjson.JSONObject" -->
+    <!--用户注册-->
+    <insert id="register">
+		INSERT INTO `t_admin`(`admin_id`,`admin_password`)
+		VALUES (#{adminName},#{password})
+		 ON DUPLICATE KEY UPDATE
+        `id` = VALUES(id),
+        `admin_id` = VALUES(admin_id),
+        `admin_password` = VALUES(admin_password)
+	</insert>
+    <!--updatePassword-->
+    <update id="updatePassword">
+		UPDATE `t_admin`
+		SET `admin_password` = #{password}
+		WHERE `admin_id` = #{adminName}
+	</update>
+
+    <!-- 查询管理员id-->
+    <select id="getAdminNameByAdminName" resultType="java.lang.Integer">
+		SELECT `id`
+		FROM `t_admin`
+		WHERE `admin_id` = #{username}
+	</select>
+
+    <!--查询adminName-->
+    <select id="getAdminName" resultType="java.lang.String">
+		  SELECT `admin_name` AS  	`adminName`
+		  FROM `t_admin`
+		  WHERE `admin_id` = #{adminId}
+	  </select>
+
+    <!--根据admin账户查询密码-->
+    <select id="getPasswordByAdminName" resultType="java.lang.String">
+		SELECT `admin_password` AS `password`
+		FROM `t_admin`
+		WHERE `admin_id` =
+		#{adminName}
+	</select>
+
+    <!--查询用户的角色及权限-->
+    <select id="listRolesPermissions" resultType="com.alibaba.fastjson.JSONObject">
+		SELECT `role_name` AS `roleName`
+		,`permission_name` AS `permissionName`
+		FROM `t_admin_role_permisson`
+		WHERE `admin_id` = #{adminName}
+	</select>
+
+    <!--countNotification-->
+    <select id="countNotification" resultType="java.lang.Integer">
+		SELECT count(*) FROM `t_notification`
+	</select>
+
+    <!--统计时间段内的通知数量-->
+    <select id="countNotification1" resultType="java.lang.Integer">
+		SELECT count(*) FROM `t_notification`
+		WHERE `publish_time` BETWEEN #{0} AND #{1}
+	</select>
+
+
+    <!--查询最近8条通知-->
+    <select id="listLastNotification" parameterType="java.lang.Integer" resultType="com.alibaba.fastjson.JSONObject">
+		SELECT `name`		AS 		`name`
+		,`content`			AS 		`content`
+		,`publish_time`		AS 		`publishTime`
+		FROM `t_notification`
+		ORDER BY `publish_time` DESC
+		LIMIT 0,#{0}
+	</select>
+
+    <!-- 分页查询-->
+    <select id="listLastNotification1" resultType="com.alibaba.fastjson.JSONObject">
+		SELECT `name`		AS 		`name`
+		,`content`			AS 		`content`
+		,`publish_time`		AS 		`publishTime`
+		FROM `t_notification`
+		ORDER BY `publish_time` DESC
+		LIMIT #{0},#{1}
+	</select>
+
+    <select id="listLastNotification2" resultType="com.alibaba.fastjson.JSONObject">
+		SELECT `name`		AS 		`name`
+		,`content`			AS 		`content`
+		,`publish_time`		AS 		`publishTime`
+		FROM `t_notification`
+		WHERE `publish_time` BETWEEN #{0} AND #{1}
+		ORDER BY `publish_time` DESC
+		LIMIT 0,#{2}
+	</select>
+
+    <select id="listLastNotification3" resultType="com.alibaba.fastjson.JSONObject">
+		SELECT `name`		AS 		`name`
+		,`content`			AS 		`content`
+		,`publish_time`		AS 		`publishTime`
+		FROM `t_notification`
+		WHERE `publish_time` BETWEEN #{0} AND #{1}
+		ORDER BY `publish_time` DESC
+		LIMIT #{2},#{3}
+	</select>
+
+    <!--查询某用户可以换的宿舍-->
+    <select id="getChangeOfDormitoryApply" resultType="com.alibaba.fastjson.JSONObject">
+		SELECT `student_roomNumber` AS  `roomNumber`
+		, `student_id`				AS   `studentId`
+		, `student_name`			AS   `name`
+		FROM `t_students`
+		WHERE `student_class` = #{className}
+	</select>
+
+    <!-- 更新用户宿舍-->
+    <update id="updateUserRoomNumber">
+		UPDATE `t_students`	SET `student_roomNumber` = #{roomNumber}
+		WHERE `student_id` = #{username}
+	</update>
+
+    <!--用户提交更换宿舍申请-->
+    <insert id="submitApplication" parameterType="com.alibaba.fastjson.JSONObject">
+		INSERT INTO `t_student_application`(
+		`student_id`
+		, `student_application_title`
+		, `student_application_content`
+	  	, `student_submit_time`
+		)
+		VALUES (
+		#{studentId}
+		,#{applicationTitle}
+		,#{applicationContent}
+		,#{submitTime}
+		)
+	</insert>
+
+    <!-- 统计用户数量-->
+    <select id="countUserNumber" resultType="java.lang.Integer">
+		SELECT COUNT(*) FROM `t_students`
+		WHERE `student_status` = 1
+	</select>
+
+    <!--查询特定页数据-->
+    <select id="listUser" resultType="com.alibaba.fastjson.JSONObject">
+		SELECT `student_id`				AS 		`studentId`
+		, `student_name`				AS 		`studentName`
+		, `student_class`				AS 		`studentClass`
+		, `student_telphone`			AS 		`studentTelPhone`
+		, `student_sex`					AS 		`studentSex`
+		, `student_building_name`		AS 		`studentBuildingName`
+		, `student_room_name`			AS 		`studentRoomName`
+		FROM `t_students`
+		WHERE `student_status` = 1
+		LIMIT #{startRow}, #{pageSize}
+	</select>
+
+    <!--统计满足条件的用户数量-->
+    <select id="countUserNumberByCondition" parameterType="com.alibaba.fastjson.JSONObject"
+            resultType="java.lang.Integer">
+        SELECT COUNT(*) FROM `t_students`
+        <where>
+            <if test="studentId != null and studentId != ''">
+                `student_id` = #{studentId}
+            </if>
+            <if test="studentName != null and studentName != ''">
+                AND `student_name` = #{studentName}
+            </if>
+            <if test="studentClass != null and studentClass != ''">
+                AND `student_class` = #{studentClass}
+            </if>
+            <if test="studentRoomName != null and studentRoomName != ''">
+                AND `student_room_name` = #{studentRoomName}
+            </if>
+            <if test="studentStatus != null and studentStatus != ''">
+                AND `student_status` = #{studentStatus}
+            </if>
+        </where>
+    </select>
+
+	<!--统计楼栋住宿情况-->
+	<select id="analysisUser" resultType="com.alibaba.fastjson.JSONObject">
+		 SELECT `student_id` 	AS `studentId`
+        , `student_name` 		AS `studentName`
+        , `student_class`   	AS `studentClass`
+        , `student_telphone`    AS `studentTelPhone`
+        , `student_sex` 		AS `studentSex`
+        , `student_building_name` AS `studentBuildingName`
+        , `student_room_name` 	  AS `studentRoomName`
+        FROM `t_students`
+        WHERE `student_status` = 1
+	</select>
+
+    <!--有条件查询用户-->
+    <select id="listUserByCondition" parameterType="com.alibaba.fastjson.JSONObject"
+            resultType="com.alibaba.fastjson.JSONObject">
+        SELECT `student_id` 	AS `studentId`
+        , `student_name` 		AS `studentName`
+        , `student_class`   	AS `studentClass`
+        , `student_telphone`    AS `studentTelPhone`
+        , `student_sex` 		AS `studentSex`
+        , `student_building_name` AS `studentBuildingName`
+        , `student_room_name` 	  AS `studentRoomName`
+        FROM `t_students`
+        <where>
+            <if test="studentId != null and studentId != ''">
+                `student_id` = #{studentId}
+            </if>
+            <if test="studentName != null and studentName != ''">
+                AND `student_name` = #{studentName}
+            </if>
+            <if test="studentClass != null and studentClass != ''">
+                AND `student_class` = #{studentClass}
+            </if>
+            <if test="studentRoomName != null and studentRoomName != ''">
+                AND `student_room_name` = #{studentRoomName}
+            </if>
+			<if test="studentBuildingName != null and studentRoomName != ''">
+				AND `student_building_name` = #{studentBuildingName}
+			</if>
+            <if test="studentStatus != null and studentStatus != ''">
+                AND `student_status` = #{studentStatus}
+            </if>
+        </where>
+        LIMIT #{startRow} , #{pageSize}
+    </select>
+
+    <!--更新用户-->
+    <update id="updateUser" parameterType="com.alibaba.fastjson.JSONObject">
+		UPDATE `t_students` SET
+		`student_building_name` = #{studentBuildingName}
+		,`student_room_name` 	= #{studentRoomName}
+		WHERE `student_id`	    = #{studentId}
+	</update>
+
+    <!-- 删除用户-->
+    <update id="deleteUser" parameterType="com.alibaba.fastjson.JSONObject">
+		UPDATE `t_students`
+		SET `student_status` = 0
+		WHERE `student_id` = #{studentId}
+	</update>
+
+    <!--添加用户-->
+    <insert id="addUser" parameterType="com.alibaba.fastjson.JSONObject">
+        INSERT INTO `t_students`(
+        `student_id`
+        ,`student_name`
+        ,`student_sex`
+        ,`student_class`
+        ,`student_telphone`
+        ,`student_building_name`
+        ,`student_room_name`
+        ,`student_password`
+        )
+        VALUES
+        <foreach collection="list"  index="index" separator="," item="item" >
+			(#{item.studentId},#{item.studentName},#{item.studentSex},#{item.studentClass},#{item.studentTelPhone},#{item.studentBuildingName},#{item.studentRoomName},#{item.studentPassword})
+		</foreach>
+    </insert>
+
+    <!--统计楼栋数量-->
+    <select id="countBuildingNumber" resultType="java.lang.Integer">
+		SELECT COUNT(*) FROM `t_building`
+		WHERE `building_status` = 1
+	</select>
+
+    <!--查询特定页数据-->
+    <select id="listBuilding" resultType="com.alibaba.fastjson.JSONObject">
+		SELECT `id`		 AS 		`buildingId`
+		,`building_name` AS   		`buildingName`
+		FROM `t_building`
+		WHERE `building_status` = 1
+		LIMIT #{startRow} , #{pageSize}
+  	</select>
+
+    <!--查询所有的楼栋-->
+    <select id="searchBuilding" resultType="com.alibaba.fastjson.JSONObject">
+		SELECT `building_name`		AS 		`buildingName`
+		FROM `t_building`
+		WHERE `building_status` = 1
+	</select>
+
+    <!--更新楼栋-->
+    <update id="updateBuilding" parameterType="com.alibaba.fastjson.JSONObject">
+		UPDATE `t_building` SET
+		`building_name` = #{buildingName}
+		WHERE `id` = #{buildingId}
+	</update>
+
+    <!--删除楼栋-->
+    <delete id="deleteBuilding" parameterType="com.alibaba.fastjson.JSONObject">
+		UPDATE `t_building`
+		SET `building_status` = 0
+		WHERE `id` = #{buildingId}
+	</delete>
+
+    <!--添加楼栋-->
+    <insert id="addBuilding" parameterType="com.alibaba.fastjson.JSONObject">
+        INSERT INTO `t_building`
+        (`building_name`)
+        VALUES
+        <foreach collection="list" item="item" separator="," index="index">
+			(#{item.buildingName})
+        </foreach>
+    </insert>
+
+    <!--更新房间-->
+    <update id="updateRoom" parameterType="com.alibaba.fastjson.JSONObject">
+        UPDATE `t_room` SET
+        <if test="roomName != '' || roomName != null">
+            `room_name` = #{roomName}
+        </if>
+        <if test="buildingName != '' || buildingName != null">
+            , `building_name` = #{buildingName}
+        </if>
+        <where>
+            <if test="roomId != '' || roomId != null">
+                `id` = #{roomId}
+            </if>
+        </where>
+    </update>
+
+    <!--删除房间-->
+    <delete id="deleteRoom" parameterType="com.alibaba.fastjson.JSONObject">
+		UPDATE `t_room`
+		SET `room_status` = 0
+		WHERE `id` = #{roomId}
+	</delete>
+
+    <!--添加房间-->
+    <insert id="addRoom" parameterType="com.alibaba.fastjson.JSONObject">
+        INSERT INTO `t_room`
+        (`room_name`,`building_name`)
+        VALUES
+        <foreach collection="list" item="item" separator="," index="index">
+			(#{item.roomName} , #{item.buildingName})
+        </foreach>
+    </insert>
+
+	<!--统计可用的房间总数-->
+	<select id="countRoomNumber" parameterType="com.alibaba.fastjson.JSONObject" resultType="java.lang.Integer">
+		SELECT COUNT(*) FROM `t_room`
+		<where>
+			<if test="roomId != null and roomId != ''">
+				`id` = #{roomId}
+			</if>
+
+			<if test="roomName != null and roomName != ''">
+				AND `room_name` = #{roomName}
+			</if>
+
+			<if test="buildingName != null and buildingName != ''">
+				AND	`building_name` = #{buildingName}
+			</if>
+
+			<if test="roomStatus != null and roomStatus != ''">
+				AND	`room_status` = #{roomStatus}
+			</if>
+		</where>
+	</select>
+
+    <!-- 查询所有房间-->
+    <select id="listRoom" parameterType="com.alibaba.fastjson.JSONObject" resultType="com.alibaba.fastjson.JSONObject">
+        SELECT `id` 		AS `roomId`
+        ,`room_name` 		AS `roomName`
+        ,`building_name`    AS `buildingName`
+        FROM `t_room`
+        <where>
+            <if test="roomId != null and roomId != ''">
+                `id` = #{roomId}
+            </if>
+
+			<if test="roomName != null and roomName != ''">
+				AND `room_name` = #{roomName}
+			</if>
+
+			<if test="1==1">
+				AND	`building_name` = #{buildingName} || `building_name` = '所有'
+			</if>
+
+			<if test="roomStatus != null and roomStatus != ''">
+				AND	`room_status` = #{roomStatus}
+			</if>
+        </where>
+		LIMIT #{startRow},#{pageSize}
+    </select>
+
+    <!-- 统计员工数量-->
+    <select id="countEmployeeNumber" resultType="java.lang.Integer">
+		SELECT COUNT(*) FROM `t_employee`
+		WHERE `employee_status` = 1
+	</select>
+
+    <!--查询特定页员工数据-->
+    <select id="listEmployee" resultType="com.alibaba.fastjson.JSONObject">
+		SELECT `employee_id`				AS 		`employeeId`
+		, `employee_name`				  	AS 		`employeeName`
+		, `employee_age`					AS 		`employeeAge`
+		, `employee_telphone`				AS 		`employeeTelPhone`
+		, `employee_sex`					AS 		`employeeSex`
+		, `employee_address`				AS 		`employeeAddress`
+		, `employee_certificate_number`		AS 		`employeeCertificateNumber`
+		FROM `t_employee`
+		WHERE `employee_status` = 1
+		LIMIT #{startRow}, #{pageSize}
+	</select>
+
+    <!--更新员工-->
+    <update id="updateEmployee" parameterType="com.alibaba.fastjson.JSONObject">
+		UPDATE `t_employee` SET
+		  `employee_id`						= 		#{employeeId}
+		, `employee_name`				  	= 		#{employeeName}
+		, `employee_age`					= 		#{employeeAge}
+		, `employee_telphone`				= 		#{employeeTelPhone}
+		, `employee_sex`					= 		#{employeeSex}
+		, `employee_address`				= 		#{employeeAddress}
+		, `employee_certificate_number`		= 		#{employeeCertificateNumber}
+		WHERE `employee_id` = #{employeeId}
+	</update>
+
+    <!-- 删除员工-->
+    <update id="deleteEmployee" parameterType="com.alibaba.fastjson.JSONObject">
+		UPDATE `t_employee`
+		SET `employee_status` = 0
+		WHERE `employee_id` = #{employeeId}
+	</update>
+
+    <!--添加员工-->
+    <insert id="addEmployee" parameterType="com.alibaba.fastjson.JSONObject">
+        INSERT INTO `t_employee`(
+        `employee_id`
+        ,`employee_name`
+        ,`employee_sex`
+        ,`employee_age`
+        ,`employee_telphone`
+        ,`employee_address`
+        ,`employee_certificate_number`
+        ,`employee_password`
+        )
+        VALUES
+        <foreach collection="list" index="index" separator="," item="item">
+			(#{item.employeeId},#{item.employeeName},#{item.employeeSex},#{item.employeeAge},#{item.employeeTelPhone},#{item.employeeAddress},#{item.employeeCertificateNumber},#{item.employeePassword})
+        </foreach>
+    </insert>
+
+	<!--统计进出楼物品登记数量-->
+	<select id="countInOutRegisterNumber" resultType="java.lang.Integer">
+		SELECT COUNT(*) FROM `t_inOutRegister`
+	</select>
+
+	<!--列举特定页进出楼登记数据-->
+	<select id="listInOutRegister" resultType="com.alibaba.fastjson.JSONObject">
+		SELECT	`id`				AS 		`id`
+		,`student_id`				AS 		`studentId`
+        ,`id_card_no`				AS 		`idCardNo`
+        ,`owner_name`				AS 		`ownerName`
+        ,`owner_sex`				AS 		`ownerSex`
+        ,`owner_telphone`			AS 		`ownerTelPhone`
+        ,`goods_category`			AS 		`goodsCategory`
+        ,`goods_full_name`			AS 		`goodsFullName`
+        ,`register_time`			AS 		`registerTime`
+        ,`goods_status`   			AS 		`goodsStatus`
+        FROM `t_inOutRegister`
+        LIMIT #{startRow} , #{pageSize}
+	</select>
+
+	<!--更新进出楼物品的登记-->
+	<update id="updateInOutRegister" parameterType="com.alibaba.fastjson.JSONObject">
+		UPDATE `t_inOutRegister` SET
+		`student_id`				= 		#{studentId}
+        ,`id_card_no`				= 		#{idCardNo}
+        ,`owner_name`				= 		#{ownerName}
+        ,`owner_sex`				= 		#{ownerSex}
+        ,`owner_telphone`			= 		#{ownerTelPhone}
+        ,`goods_category`			= 		#{goodsCategory}
+        ,`goods_full_name`			= 		#{goodsFullName}
+        ,`register_time`			= 		#{registerTime}
+        ,`goods_status`   			= 		#{goodsStatus}
+        WHERE `id` = #{id}
+	</update>
+
+	<!--删除进出楼物品登记记录-->
+	<delete id="deleteInOutRegister" parameterType="com.alibaba.fastjson.JSONObject">
+		DELETE FROM `t_inOutRegister`
+		WHERE `id` = #{id}
+	</delete>
+
+    <!-- 添加外来物品登记-->
+    <insert id="addInOutRegister" parameterType="com.alibaba.fastjson.JSONObject">
+        INSERT INTO `t_inOutRegister`(
+        `student_id`
+        ,`id_card_no`
+        ,`owner_name`
+        ,`owner_sex`
+        ,`owner_telphone`
+        ,`goods_category`
+        ,`goods_full_name`
+        ,`register_time`
+        ,`goods_status`
+        )VALUES
+        <foreach collection="list" item="item" separator="," index="index">
+            (#{item.studentId},#{item.idCardNo},#{item.studentName},#{item.studentSex},#{item.studentTelPhone},#{item.goodsCategory},#{item.goodsFullName},#{item.registerTime},#{item.goodsStatus})
+        </foreach>
+    </insert>
+
+	<!--统计人员来访登记数量-->
+	<select id="countMockSurveyNumber" resultType="java.lang.Integer" parameterType="com.alibaba.fastjson.JSONObject">
+		SELECT COUNT(*) FROM `t_visitor_record`
+		<where>
+			<if test="visitorName != null and visitorName != ''">
+				`visitor_name` = #{visitorName}
+			</if>
+			<if test="visitorSex != null and visitorSex != ''">
+				AND `visitor_sex` = #{visitorSex}
+			</if>
+			<if test="visitorTelphone != null and visitorTelphone != ''">
+				AND `visitor_telphone` = #{visitorTelphone}
+			</if>
+			<if test="visitorIdCardNo != null and visitorIdCardNo != ''">
+				AND `visitor_id_card_no` = #{visitorIdCardNo}
+			</if>
+		</where>
+	</select>
+
+	<!--列举特定页进出楼登记数据-->
+	<select id="listMockSurvey" resultType="com.alibaba.fastjson.JSONObject" parameterType="com.alibaba.fastjson.JSONObject">
+		SELECT	`id`				AS 		`id`
+		,`visitor_name`				AS 		`visitorName`
+		,`visitor_id_card_no`		AS 		`visitorIdCardNo`
+		,`visitor_sex`				AS 		`visitorSex`
+		,`visitor_telphone`			AS 		`visitorTelphone`
+		,`visitor_reason`			AS 		`visitorReason`
+		,`visitor_in`				AS 		`visitorIn`
+		,`visitor_out`				AS 		`visitorOut`
+		FROM `t_visitor_record`
+		<where>
+			<if test="visitorName != null and visitorName != ''">
+				`visitor_name` = #{visitorName}
+			</if>
+			<if test="visitorSex != null and visitorSex != ''">
+				AND `visitor_sex` = #{visitorSex}
+			</if>
+			<if test="visitorTelphone != null and visitorTelphone != ''">
+				AND `visitor_telphone` = #{visitorTelphone}
+			</if>
+			<if test="visitorIdCardNo != null and visitorIdCardNo != ''">
+				AND `visitor_id_card_no` = #{visitorIdCardNo}
+			</if>
+		</where>
+		LIMIT #{startRow} , #{pageSize}
+	</select>
+
+	<!--更新人员访问的登记-->
+	<update id="updateMockSurvey" parameterType="com.alibaba.fastjson.JSONObject">
+		UPDATE `t_visitor_record` SET
+		`visitor_name`				= 		#{visitorName}
+		,`visitor_id_card_no`		= 		#{visitorIdCardNo}
+		,`visitor_sex`				= 		#{visitorSex}
+		,`visitor_telphone`			= 		#{visitorTelphone}
+		,`visitor_reason`			= 		#{visitorReason}
+		WHERE `id` = #{id}
+	</update>
+
+	<!--结束人员访问-->
+	<update id="mockSurveyConcludeVisit" parameterType="com.alibaba.fastjson.JSONObject">
+		UPDATE `t_visitor_record` SET
+		`visitor_out`			= 		#{visitorOut}
+		WHERE `id` = #{id}
+	</update>
+
+	<!--删除进出楼物品登记记录-->
+	<delete id="deleteMockSurvey" parameterType="com.alibaba.fastjson.JSONObject">
+		DELETE FROM `t_visitor_record`
+		WHERE `id` = #{id}
+	</delete>
+
+	<!-- 添加人员访问登记-->
+	<insert id="addMockSurvey" parameterType="com.alibaba.fastjson.JSONObject">
+		INSERT INTO `t_visitor_record`(
+	  	`visitor_name`
+		,`visitor_id_card_no`
+		,`visitor_sex`
+		,`visitor_telphone`
+		,`visitor_reason`
+		,`visitor_in`
+		)VALUES
+		<foreach collection="list" item="item" separator="," index="index">
+			(#{item.visitorName},#{item.visitorIdCardNo},#{item.visitorSex},#{item.visitorTelPhone},#{item.visitorReason},#{item.visitorIn})
+		</foreach>
+	</insert>
+</mapper>

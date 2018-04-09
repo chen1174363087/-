@@ -1,0 +1,408 @@
+<!DOCTYPE html>
+<html lang="en" ng-app="app" ng-controller="AppCtrl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+    <META HTTP-EQUIV="Pragma" CONTENT="no-cache">
+    <META HTTP-EQUIV="Cache-Control" CONTENT="no-cache">
+    <META HTTP-EQUIV="Expires" CONTENT="0">
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+    <meta http-equiv="Content-Language" content="zh-CN"/>
+    <title>buildingCondition</title>
+    <script src="/webjars/angular/1.5.8/angular.min.js"></script>
+    <script src="/webjars/angular-resource/1.5.8/angular-resource.min.js"></script>
+    <style type="text/css">
+        html, body {
+            width: 100%;
+            height: 100%;
+            margin: 0;
+            overflow-x: scroll;
+            overflow-y: scroll;
+        }
+
+        /*要弹出板块*/
+        .white_content {
+            display: none;
+            position: absolute;
+            background-color: #fef7ec;
+            top: 7%;
+            left: 25%;
+            width: 50%;
+            height: 55%;
+            border: 8px solid #D6E9F1;
+            z-index: 1002;
+            overflow-x: scroll;
+            overflow-y: scroll;
+        }
+
+        /*关闭*/
+        .update {
+            text-align: center;
+            clear: both;
+            width: 10%;
+            margin: 0 0 6px 0;
+            color: #009ceb;
+        }
+
+        .black_overlay {
+            display: none;
+            position: absolute;
+            top: 0%;
+            left: 0%;
+            width: 100%;
+            height: 100%;
+            background-color: #f5f5f5;
+            z-index: 1001;
+            -moz-opacity: 0.8;
+            opacity: .80;
+            filter: alpha(opacity=80);
+        }
+
+        .spanLeft {
+            margin-left: 10px;
+            float: left
+        }
+
+        .inputLeft {
+            margin-right: 10px;
+            float: right;
+            width: 80%;
+        }
+
+        table, td, th {
+            border: 1px solid black;
+            text-align: center;
+        }
+
+        #contentRight {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            float: left;
+            background: #F5F5F5;
+            overflow-x: scroll;
+            overflow-y: scroll;
+        }
+
+        @media screen and (max-width: 1600px) {
+            html {
+                font-size: 24px;
+            }
+
+            .moreBlue {
+                color: #009ceb;
+                font-size: 18px;
+            }
+
+            .green {
+                font-size: 18px;
+                color: #00B83F;
+            }
+        }
+
+        @media screen and (max-width: 1200px) {
+            html {
+                font-size: 20px;
+            }
+
+            .moreBlue {
+                color: #009ceb;
+                font-size: 14px;
+            }
+
+            .green {
+                font-size: 14px;
+                color: #00B83F;
+            }
+        }
+
+        @media screen and (max-width: 800px) {
+            html {
+                font-size: 16px;
+            }
+
+            .moreBlue {
+                color: #009ceb;
+                font-size: 10px;
+            }
+
+            .green {
+                font-size: 10px;
+                color: #00B83F;
+            }
+        }
+
+        @media screen and (max-width: 600px) {
+            html {
+                font-size: 14px;
+            }
+
+            .moreBlue {
+                color: #009ceb;
+                font-size: 8px;
+            }
+
+            .green {
+                font-size: 8px;
+                color: #00B83F;
+            }
+        }
+    </style>
+
+</head>
+<body>
+
+<div id="contentRight" align="center" ng-cloak>
+    <div style="margin-top: 20px">
+        <button class="moreBlue" ng-bind="'一键分析'" ng-click="analysis()"></button>
+        &nbsp;
+        <span class="moreBlue" ng-bind="'请选择楼栋'"></span>
+        <select id="buildingName" style="width: 20%">
+            <option class="moreBlue" style="border: none"
+                    ng-repeat="option in buildings track by $index"
+                    value="{{option}}"
+                    ng-bind="option"></option>
+        </select>
+        &nbsp;
+        <span class="moreBlue" ng-bind="'请选择宿舍'"></span>
+        <select id="roomName" style="width: 20%">
+            <option class="moreBlue" style="border: none"
+                    ng-repeat="option in rooms track by $index"
+                    value="{{option}}"
+                    ng-bind="option"></option>
+        </select>
+        &nbsp;
+        <button ng-bind="'搜索'" class="green" ng-click="postBuildingRoom()"></button>
+        <hr>
+    </div>
+
+    <div>
+        <table style="text-align: center" width="98%">
+            <thead class="moreBlue"/>
+            <tr>
+                <td style="width: 5%">序号</td>
+                <td style="width: 15%">学号</td>
+                <td style="width: 10%">姓名</td>
+                <td style="width: 10%">性别</td>
+                <td style="width: 15%">班级</td>
+                <td style="width: 15%">手机号</td>
+                <td style="width: 15%">楼栋</td>
+                <td style="width: 15%">房间号</td>
+            </tr>
+            <tbody ng-if="arrayFlag" ng-repeat="item in userManageResult track by $index">
+            <tr ng-class="{moreBlue: $index % 2 != 0 , green: $index % 2 == 0}">
+                <td ng-bind="$index + 1"/>
+                <td ng-bind="item.studentId"/>
+                <td ng-bind="item.studentName"/>
+                <td ng-bind="item.studentSex"/>
+                <td ng-bind="item.studentClass"/>
+                <td ng-bind="item.studentTelPhone"/>
+                <td ng-bind="item.studentBuildingName"/>
+                <td ng-bind="item.studentRoomName"/>
+            </tr>
+            <br>
+            </tbody>
+        </table>
+        <span style="color: red" ng-if="!arrayFlag" ng-bind="userManageResult"></span>
+    </div>
+
+    <div class="moreBlue" ng-if="userManageResult[0].pages > 0">
+        <span class="moreBlue" ng-bind="'共'+userManageResult[0].pages+'页'"></span>
+        <span ng-click="userManageList(1)">首页</span>
+        <span ng-if="pageNow > 1" ng-click="userManageList(pageNow - 1)"> << </span>
+        <span ng-bind="pageNow"></span>
+        <span ng-if="pageNow < userManageResult[0].pages"
+              ng-click="userManageList(pageNow + 1)"> >> </span>
+        <span ng-click="userManageList(userManageResult[0].pages)">尾页</span>
+        <input type="text" ng-model="pageSearch" style="width: 4%"/>
+        <span ng-bind="'搜索'" ng-click="userManageList(pageSearch)"></span>
+    </div>
+</div>
+</div>
+</body>
+
+<script>
+    var app = angular.module('app', ['ngResource']);
+    app.factory('UserApi', ['$resource', function ($resource) {
+        return $resource('/admin/login/:id', null, {});
+    }]);
+    app.controller("AppCtrl", function ($http, $scope, $document) {
+
+        var buildingParam = {
+            pageNow: ''
+        };
+
+        var roomParam = {
+            pageNow: '',
+            roomName: '',
+            buildingName: '',
+            roomStatus: 1
+        };
+
+        var buildings = [];
+        var rooms = [];
+
+        var listRooms = function (roomParam) {
+            $http({
+                method: 'POST',
+                url: '/apartmentManage/room',
+                data: roomParam
+            }).then(function success(resp) {
+                console.log((rooms));
+                rooms.splice(0);
+                rooms.push('所有宿舍');
+                $scope.roomsResult1 = (resp.data)[0];
+                angular.forEach(resp.data, function (value, index) {
+                    rooms.push(value.roomName);
+                });
+                rooms.push("上一组");
+                rooms.push("下一组");
+                console.log((roomParam));
+            });
+        };
+
+        var listBuildings = function (buildingParam) {
+            $http({
+                method: 'POST',
+                url: '/apartmentManage/building',
+                data: buildingParam
+            }).then(function success(resp) {
+                buildings.splice(0);
+                buildings.push('所有楼栋');
+                $scope.buildinsResult1 = (resp.data)[0];
+                angular.forEach(resp.data, function (value, index) {
+                    buildings.push(value.buildingName);
+                });
+                buildings.push("上一组");
+                buildings.push("下一组");
+                console.log((buildingParam));
+            });
+        };
+
+        listBuildings(buildingParam);
+        listRooms(roomParam);
+
+        var postBuildingRoom = function () {
+            var buildingParam = {
+                pageNow: ''
+            };
+
+            var roomParam = {
+                pageNow: '',
+                roomName: '',
+                buildingName: '',
+                roomStatus: 1
+            };
+
+            var selectBuilding = $document[0].getElementById("buildingName");
+            var selectRoom = $document[0].getElementById("roomName");
+            var selectedBuilding = selectBuilding.selectedIndex;
+            var selectedRoom = selectRoom.selectedIndex;
+            console.log(selectBuilding[selectedBuilding].value, selectRoom[selectedRoom].value);
+            //上一页
+            if (selectedBuilding == buildings.length - 2) {
+                if ($scope.buildinsResult1.pageNow > 1) {
+                    buildingParam.pageNow = $scope.buildinsResult1.pageNow - 1;
+                } else {
+                    window.alert("");
+                    buildingParam.pageNow = 1;
+                }
+                //下一页
+            } else if (selectedBuilding == buildings.length - 1) {
+                window.alert('xia')
+                if ($scope.buildinsResult1.pageNow < $scope.buildinsResult1.pages) {
+                    buildingParam.pageNow = $scope.buildinsResult1.pageNow + 1;
+                } else {
+                    buildingParam.pageNow = $scope.buildinsResult1.pages;
+                }
+            } else if (selectedBuilding == 0) {
+            } else {
+                roomParam.buildingName = selectBuilding[selectedBuilding].value;
+                buildingParam.buildingName = selectBuilding[selectedBuilding].value;
+                userManageParam.studentBuildingName = selectBuilding[selectedBuilding].value;
+            }
+            //上一页
+            if (selectedRoom == rooms.length - 2) {
+                if ($scope.roomsResult1.pageNow > 1) {
+                    roomParam.pageNow = $scope.roomsResult1.pageNow - 1;
+                } else {
+                    roomParam.pageNow = 1;
+                }
+            } else if (selectedRoom == rooms.length - 1) {
+                if ($scope.roomsResult1.pageNow < $scope.roomsResult1.pages) {
+                    roomParam.pageNow = $scope.roomsResult1.pageNow + 1;
+                } else {
+                    roomParam.pageNow = $scope.roomsResult1.pages;
+                }
+            } else if (selectedRoom == 0) {
+
+            } else {
+                roomParam.roomName = selectRoom[selectedRoom].value;
+                userManageParam.studentRoomName = selectRoom[selectedRoom].value;
+            }
+            listRooms(roomParam);
+            listBuildings(buildingParam);
+            userManageList(1);
+        };
+        ///////////////////////用户分页
+        var userManageParam = {
+            pageNow: '',
+            studentId: '',
+            studentName: '',
+            studentClass: '',
+            studentRoomName: '',
+            studentBuildingName: '',
+            studentStatus: 1
+        };
+
+        $scope.pageSearch = 2;
+        $scope.pageNow = 1;
+
+        $scope.userManageResult = [];
+        $scope.arrayFlag = false;
+
+        var userManageList = function (pageResult) {
+            if (pageResult != undefined) {
+                $scope.pageNow = pageResult;
+            }
+            $scope.arrayFlag = false;
+            userManageParam.pageNow = pageResult;
+            $http({
+                method: 'POST',
+                url: '/informationSearch/studentBasicInfo',
+                data: userManageParam
+            }).then(function success(resp) {
+                $scope.userManageResult = resp.data;
+                if (Array.isArray($scope.userManageResult)) {
+                    $scope.arrayFlag = true;
+                }
+            });
+        };
+
+
+        var analysis = function () {
+            $http({
+                method:'GET',
+                url:'/informationSearch/analysis'
+            }).then(function success(resp) {
+                $scope.buildingCategorys = resp.data;
+               console.log( $scope.buildingCategorys);
+            });
+        };
+
+        angular.extend($scope, {
+            buildings: buildings,
+            buildingParam: buildingParam,
+            rooms: rooms,
+            roomParam: roomParam,
+            listBuildings: listBuildings,
+            listRooms: listRooms,
+            postBuildingRoom: postBuildingRoom,
+            userManageParam: userManageParam,
+            userManageList: userManageList,
+            analysis : analysis
+        });
+    });
+</script>
+
+</html>
